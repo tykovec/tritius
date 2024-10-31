@@ -1,24 +1,25 @@
-"""Adds config flow for Blueprint."""
+"""Adds config flow for Tritius."""
 
 from __future__ import annotations
 
 import voluptuous as vol
 from homeassistant import config_entries, data_entry_flow
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
+from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from .api import (
-    IntegrationBlueprintApiClient,
-    IntegrationBlueprintApiClientAuthenticationError,
-    IntegrationBlueprintApiClientCommunicationError,
-    IntegrationBlueprintApiClientError,
+    TritiusApiClient,
+    TritiusApiClientAuthenticationError,
+    TritiusApiClientCommunicationError,
+    TritiusApiClientError,
 )
 from .const import DOMAIN, LOGGER
+from .data import TritiusUser
 
 
-class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
-    """Config flow for Blueprint."""
+class TritiusFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
+    """Config flow for Tritius."""
 
     VERSION = 1
 
@@ -30,22 +31,27 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         _errors = {}
         if user_input is not None:
             try:
-                await self._test_credentials(
+                user = await self._test_credentials(
+                    url=user_input[CONF_URL],
                     username=user_input[CONF_USERNAME],
                     password=user_input[CONF_PASSWORD],
                 )
-            except IntegrationBlueprintApiClientAuthenticationError as exception:
+
+                if not isinstance(user, TritiusUser):
+                    raise TritiusApiClientAuthenticationError
+
+            except TritiusApiClientAuthenticationError as exception:
                 LOGGER.warning(exception)
                 _errors["base"] = "auth"
-            except IntegrationBlueprintApiClientCommunicationError as exception:
+            except TritiusApiClientCommunicationError as exception:
                 LOGGER.error(exception)
                 _errors["base"] = "connection"
-            except IntegrationBlueprintApiClientError as exception:
+            except TritiusApiClientError as exception:
                 LOGGER.exception(exception)
                 _errors["base"] = "unknown"
             else:
                 return self.async_create_entry(
-                    title=user_input[CONF_USERNAME],
+                    title=f"{user.name} {user.surname}",
                     data=user_input,
                 )
 
@@ -53,6 +59,14 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=vol.Schema(
                 {
+                    vol.Required(
+                        CONF_URL,
+                        default=(user_input or {}).get(CONF_URL, vol.UNDEFINED),
+                    ): selector.TextSelector(
+                        selector.TextSelectorConfig(
+                            type=selector.TextSelectorType.TEXT,
+                        ),
+                    ),
                     vol.Required(
                         CONF_USERNAME,
                         default=(user_input or {}).get(CONF_USERNAME, vol.UNDEFINED),
@@ -71,11 +85,14 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             errors=_errors,
         )
 
-    async def _test_credentials(self, username: str, password: str) -> None:
+    async def _test_credentials(
+        self, url: str, username: str, password: str
+    ) -> TritiusUser:
         """Validate credentials."""
-        client = IntegrationBlueprintApiClient(
+        client = TritiusApiClient(
+            url=url,
             username=username,
             password=password,
             session=async_create_clientsession(self.hass),
         )
-        await client.async_get_data()
+        return await client.login()

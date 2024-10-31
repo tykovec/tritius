@@ -1,4 +1,4 @@
-"""DataUpdateCoordinator for integration_blueprint."""
+"""DataUpdateCoordinator for tritius."""
 
 from __future__ import annotations
 
@@ -9,22 +9,23 @@ from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import (
-    IntegrationBlueprintApiClientAuthenticationError,
-    IntegrationBlueprintApiClientError,
+    TritiusApiClientAuthenticationError,
+    TritiusApiClientError,
 )
 from .const import DOMAIN, LOGGER
+from .data import TritiusCoordinatorData
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
 
-    from .data import IntegrationBlueprintConfigEntry
+    from .data import TritiusConfigEntry
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
-class BlueprintDataUpdateCoordinator(DataUpdateCoordinator):
+class TritiusDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching data from the API."""
 
-    config_entry: IntegrationBlueprintConfigEntry
+    config_entry: TritiusConfigEntry
 
     def __init__(
         self,
@@ -41,8 +42,13 @@ class BlueprintDataUpdateCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self) -> Any:
         """Update data via library."""
         try:
-            return await self.config_entry.runtime_data.client.async_get_data()
-        except IntegrationBlueprintApiClientAuthenticationError as exception:
+            user = await self.config_entry.runtime_data.client.login()
+
+            return TritiusCoordinatorData(
+                user=user,
+                borrowings=await self.config_entry.runtime_data.client.async_get_borrowings(),
+            )
+        except TritiusApiClientAuthenticationError as exception:
             raise ConfigEntryAuthFailed(exception) from exception
-        except IntegrationBlueprintApiClientError as exception:
+        except TritiusApiClientError as exception:
             raise UpdateFailed(exception) from exception

@@ -1,0 +1,6 @@
+renew_borrowings:
+  target:
+    entity:
+      integration: tritius
+      supported_features:
+        -  1  # Matches tritius.TritiusEntityFeature.RENEW_BORROWINGS

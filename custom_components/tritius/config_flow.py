@@ -13,9 +13,9 @@ from .api import (
     TritiusApiClientAuthenticationError,
     TritiusApiClientCommunicationError,
     TritiusApiClientError,
+    TritiusUser,
 )
-from .const import DOMAIN, LOGGER
-from .data import TritiusUser
+from .const import _LOGGER, DOMAIN
 
 
 class TritiusFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
@@ -41,13 +41,13 @@ class TritiusFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     raise TritiusApiClientAuthenticationError
 
             except TritiusApiClientAuthenticationError as exception:
-                LOGGER.warning(exception)
+                _LOGGER.warning(exception)
                 _errors["base"] = "auth"
             except TritiusApiClientCommunicationError as exception:
-                LOGGER.error(exception)
+                _LOGGER.error(exception)
                 _errors["base"] = "connection"
             except TritiusApiClientError as exception:
-                LOGGER.exception(exception)
+                _LOGGER.exception(exception)
                 _errors["base"] = "unknown"
             else:
                 return self.async_create_entry(
@@ -89,10 +89,11 @@ class TritiusFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         self, url: str, username: str, password: str
     ) -> TritiusUser:
         """Validate credentials."""
+        session = async_create_clientsession(self.hass)
         client = TritiusApiClient(
             url=url,
             username=username,
             password=password,
-            session=async_create_clientsession(self.hass),
+            session=session,
         )
-        return await client.login()
+        return await client.async_get_user_data()

@@ -1,31 +1,24 @@
 """Custom integration to integrate tritius with Home Assistant.
 
 For more details about this integration, please refer to
-https://github.com/tykovec/tritius
+https://github.com/tykovec/home-assistant-tritius
 
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME, Platform
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from homeassistant.loader import async_get_loaded_integration
 
 from .api import TritiusApiClient
 from .coordinator import TritiusDataUpdateCoordinator
-from .data import TritiusData
+from .data import TritiusConfigEntry, TritiusData
 
-if TYPE_CHECKING:
-    from homeassistant.core import HomeAssistant
-
-    from .data import TritiusConfigEntry
-
-PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.BUTTON]
+PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BUTTON]
 
 
-# https://developers.home-assistant.io/docs/config_entries_index/#setting-up-an-entry
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: TritiusConfigEntry,
@@ -35,14 +28,12 @@ async def async_setup_entry(
         url=entry.data[CONF_URL],
         username=entry.data[CONF_USERNAME],
         password=entry.data[CONF_PASSWORD],
-        session=async_get_clientsession(hass),
+        session=async_create_clientsession(hass),
     )
 
-    user = await client.login()
+    user = await client.async_get_user_data()
 
-    coordinator = TritiusDataUpdateCoordinator(
-        hass=hass,
-    )
+    coordinator = TritiusDataUpdateCoordinator(hass, client)
     entry.runtime_data = TritiusData(
         client=client,
         integration=async_get_loaded_integration(hass, entry.domain),
@@ -50,12 +41,14 @@ async def async_setup_entry(
         user=user,
     )
 
+    # load first entities
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
+    # fill them with value from first coordimnator loading
     await coordinator.async_config_entry_first_refresh()
 
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+
     return True
 
 

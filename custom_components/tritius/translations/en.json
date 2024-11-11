@@ -2,7 +2,7 @@
     "config": {
         "step": {
             "user": {
-                "description": "If you need help with the configuration have a look here: https://github.com/tykovec/tritius",
+                "description": "If you need help with the configuration have a look here: https://github.com/tykovec/home-assistant-tritius",
                 "data": {
                     "url": "Url",
                     "username": "Username",
@@ -11,9 +11,33 @@
             }
         },
         "error": {
-            "auth": "Username/Password is wrong.",
-            "connection": "Unable to connect to the server.",
-            "unknown": "Unknown error occurred."
+            "auth": "Invalid username / password.",
+            "connection": "Unable to connect.",
+            "unknown": "Unknown error."
+        }
+    },
+    "entity": {
+        "button": {
+            "renew_borrowings": {
+                "name": "Renew borrowings"
+            }
+        },
+        "sensor": {
+            "borrowings": {
+                "name": "Borrowings"
+            },
+            "registration_expiration": {
+                "name": "Registration expiration"
+            },
+            "borrowing_expiration": {
+                "name": "Borrowing expiration"
+            }
+        }
+    },
+    "services": {
+        "renew_borrowings": {
+            "name": "Renew borrowings",
+            "description": "Renew all borrowings"
         }
     }
 }

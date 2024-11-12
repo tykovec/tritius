@@ -1,18 +1,14 @@
 """Constants for tritius."""
 
-from enum import IntFlag, StrEnum
+from datetime import timedelta
+from enum import StrEnum
 from logging import Logger, getLogger
 
 _LOGGER: Logger = getLogger(__package__)
 
 DOMAIN = "tritius"
 SERVICE_RENEW_BORROWINGS = "renew_borrowings"
-
-
-class TritiusEntityFeature(IntFlag):
-    """Class for entity features."""
-
-    RENEW_BORROWINGS = 1
+ALERT_DELTA: timedelta = timedelta(days=1)
 
 
 class Url(StrEnum):

@@ -294,7 +294,7 @@ class TritiusApiClient:
         borrowings.sort(key=lambda x: (x.expiration, x.title))
         return borrowings
 
-    async def async_renew_all(self) -> bool:
+    async def async_renew_borrowings(self) -> bool:
         """Renew all borrowings."""
         borrowings_page = await self.async_get_borrowings_page()
         form = borrowings_page.select_one(Selector.RENEW_ALL_FORM)

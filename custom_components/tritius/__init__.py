@@ -15,8 +15,14 @@ from homeassistant.loader import async_get_loaded_integration
 from .api import TritiusApiClient
 from .coordinator import TritiusDataUpdateCoordinator
 from .data import TritiusConfigEntry, TritiusData
+from .services import async_setup_services
 
-PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.BUTTON]
+PLATFORMS: list[Platform] = [
+    Platform.SENSOR,
+    Platform.BUTTON,
+    Platform.BINARY_SENSOR,
+    Platform.SWITCH,
+]
 
 
 async def async_setup_entry(
@@ -46,6 +52,8 @@ async def async_setup_entry(
 
     # fill them with value from first coordimnator loading
     await coordinator.async_config_entry_first_refresh()
+
+    await async_setup_services(hass)
 
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 

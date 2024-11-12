@@ -10,7 +10,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import _LOGGER, DOMAIN
-from .coordinator import TritiusDataUpdateCoordinator
+from .coordinator import TritiusCoordinatorData, TritiusDataUpdateCoordinator
 from .data import TritiusData
 
 
@@ -45,5 +45,5 @@ class TritiusEntity(CoordinatorEntity[TritiusDataUpdateCoordinator]):
 class TritiusEntityMixin:
     """Mixin for lambda data retrieval."""
 
-    value_fn: Callable[[dict[str, Any]], Any]
-    attr_fn: Callable[[dict[str, Any]], Any] | None = None
+    value_fn: Callable[[TritiusCoordinatorData], Any]
+    attr_fn: Callable[[TritiusCoordinatorData], Any] | None = None

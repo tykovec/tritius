@@ -1,6 +1,8 @@
 renew_borrowings:
-  target:
-    entity:
-      integration: tritius
-      supported_features:
-        -  1  # Matches tritius.TritiusEntityFeature.RENEW_BORROWINGS
+  fields:
+    device_id:
+      required: true
+      multiple: true
+      selector:
+        device:
+          integration: "tritius"

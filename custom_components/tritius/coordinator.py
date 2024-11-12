@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
-from typing import Any, TypedDict
+from dataclasses import dataclass
+from datetime import date, timedelta
+from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
@@ -16,18 +17,25 @@ from .api import (
     TritiusBorrowing,
     TritiusUser,
 )
-from .const import _LOGGER, DOMAIN
+from .const import _LOGGER, ALERT_DELTA, DOMAIN
 
 
-class TritiusCoordinatorData(TypedDict):
+@dataclass  # noqa: F821
+class TritiusCoordinatorData:
     """All data retrieved by api."""
 
     user: TritiusUser | None
     borrowings: list[TritiusBorrowing] | None
+    borrowing_expiration: date | None
+
+    def has_borrowing_alert(self) -> bool:
+        """Borrowing alert of data."""
+        return self.borrowing_expiration is not None and self.borrowing_expiration <= (
+            date.today() + ALERT_DELTA
+        )
 
 
-# https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
-class TritiusDataUpdateCoordinator(DataUpdateCoordinator):
+class TritiusDataUpdateCoordinator(DataUpdateCoordinator[TritiusCoordinatorData]):
     """Class to manage fetching data from the API."""
 
     def __init__(self, hass: HomeAssistant, client: TritiusApiClient) -> None:
@@ -44,9 +52,13 @@ class TritiusDataUpdateCoordinator(DataUpdateCoordinator):
         """Update data via library."""
         try:
             async with self._client.authorized():
+                borrowings = await self._client.async_get_borrowings()
                 return TritiusCoordinatorData(
                     user=await self._client.async_get_user_data(),
-                    borrowings=await self._client.async_get_borrowings(),
+                    borrowings=borrowings,
+                    borrowing_expiration=borrowings[0].expiration
+                    if bool(borrowings)
+                    else None,
                 )
         except TritiusApiClientAuthenticationError as exception:
             raise ConfigEntryAuthFailed(exception) from exception

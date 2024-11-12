@@ -32,12 +32,23 @@
             "borrowing_expiration": {
                 "name": "Borrowing expiration"
             }
+        },
+        "binary_sensor": {
+            "borrowings_alert": {
+                "name": "Borrowings alert"
+            }
         }
     },
     "services": {
         "renew_borrowings": {
             "name": "Renew borrowings",
-            "description": "Renew all borrowings"
+            "description": "Renew all borrowings",
+            "fields": {
+                "device_id": {
+                    "name": "Device",
+                    "description": "Device"
+                }
+            }
         }
     }
 }

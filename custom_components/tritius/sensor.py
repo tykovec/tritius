@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import cast
 
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .api import TritiusBorrowing, TritiusUser
+from .api import TritiusUser
 from .data import (
     TritiusConfigEntry,
     TritiusData,
@@ -27,30 +26,28 @@ ENTITY_DESCRIPTIONS: tuple[TritiusSensorEntityDescription, ...] = (
         key="borrowings",
         translation_key="borrowings",
         icon="mdi:book-open-variant-outline",
-        value_fn=lambda x: len(x.get("borrowings", [])),
-        attr_fn=lambda x: {"borrowings": x.get("borrowings", [])},
+        value_fn=lambda x: 0 if x.borrowings is None else len(x.borrowings),
+        attr_fn=lambda x: {"borrowings": x.borrowings or []},
     ),
     TritiusSensorEntityDescription(
         key="registration_expiration",
         translation_key="registration_expiration",
         icon="mdi:calendar-alert",
-        value_fn=lambda x: cast(TritiusUser, x.get("user")).registration_expiration
-        if "user" in x and isinstance(x.get("user"), TritiusUser)
+        value_fn=lambda x: x.user.registration_expiration
+        if isinstance(x.user, TritiusUser)
         else None,
     ),
     TritiusSensorEntityDescription(
         key="borrowing_expiration",
         translation_key="borrowing_expiration",
         icon="mdi:calendar-alert",
-        value_fn=lambda x: cast(TritiusBorrowing, x.get("borrowings", [])[0]).expiration
-        if bool(x.get("borrowings", []))
-        else None,
+        value_fn=lambda x: x.borrowing_expiration,
     ),
 )
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,  # noqa: ARG001 Unused function argument: `hass`
+    hass: HomeAssistant,
     entry: TritiusConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
@@ -65,7 +62,7 @@ async def async_setup_entry(
 
 
 class TritiusSensor(TritiusEntity, SensorEntity):
-    """Tritius Sensor class."""
+    """Tritius sensor class."""
 
     entity_description: TritiusSensorEntityDescription
 

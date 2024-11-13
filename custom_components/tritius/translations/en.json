@@ -37,6 +37,11 @@
             "borrowings_alert": {
                 "name": "Borrowings alert"
             }
+        },
+        "switch": {
+            "auto_renew_borrowings": {
+                "name": "Auto renew borrowings"
+            }
         }
     },
     "services": {

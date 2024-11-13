@@ -15,7 +15,7 @@ ENTITY_DESCRIPTIONS: tuple[ButtonEntityDescription, ...] = (
     ButtonEntityDescription(
         key="renew_borrowings",
         translation_key="renew_borrowings",
-        icon="mdi:book-open-variant-outline",
+        icon="mdi:card",
     ),
 )
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Mapping
-from datetime import date, datetime
+from datetime import date
 from typing import Any
 
 from homeassistant.components.switch import (
@@ -16,9 +16,8 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from custom_components.tritius.const import _LOGGER
-
-from .api import TritiusApiClient
+from .api import TritiusApiClient, TritiusApiClientError
+from .const import _LOGGER
 from .data import (
     TritiusConfigEntry,
     TritiusData,
@@ -29,7 +28,7 @@ ENTITY_DESCRIPTIONS: tuple[SwitchEntityDescription, ...] = (
     SwitchEntityDescription(
         key="auto_renew_borrowings",
         translation_key="auto_renew_borrowings",
-        icon="mdi:book-open-variant-outline",
+        icon="mdi:autorenew",
     ),
 )
 
@@ -64,24 +63,34 @@ class TritiusSwitchSensor(TritiusEntity, RestoreEntity, SwitchEntity):
         """Initialize the switch class."""
         super().__init__(data, entity_description.key)
         self._client = data.client
+        self._last_run = None
+        self._state = False
         self.entity_description = entity_description
 
     async def async_added_to_hass(self) -> None:
         """Call when the switch is added to hass."""
-        if not (last_state := await self.async_get_last_state()):
-            return
-        self._attr_is_on = last_state.state == STATE_ON
-        self._last_run = last_state.attributes.get("last_run")
         await super().async_added_to_hass()
+        if not (last_state := await self.async_get_last_state()):
+            _LOGGER.debug("No old state detected")
+            return
+        _LOGGER.debug("Last state %s", last_state.attributes)
+        _LOGGER.debug("Last state %s", last_state.state)
+        self._state = last_state.state == STATE_ON
+        self._last_run = last_state.attributes.get("last_run")
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if device is on."""
+        return self._state
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn on the switch."""
-        self._attr_is_on = True
+        self._state = True
         self.async_write_ha_state()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn off the switch."""
-        self._attr_is_on = False
+        self._state = False
         self.async_write_ha_state()
 
     @property
@@ -90,19 +99,23 @@ class TritiusSwitchSensor(TritiusEntity, RestoreEntity, SwitchEntity):
         return {"last_run": self._last_run}
 
     @callback
-    async def _handle_coordinator_update(self):
-        now = datetime.date.now()
+    def _handle_coordinator_update(self):
+        now = date.today()
         result = False
 
         # Run update only once a day
-        if self.coordinator.data.has_borrowing_alert() and self._last_run != now:
+        if (
+            self.coordinator.data.has_borrowing_alert()
+            and self._last_run != now
+            and self._state
+        ):
             try:
                 result = asyncio.run_coroutine_threadsafe(
                     self._client.async_renew_borrowings(),
                     self.hass.loop,
                 ).result()
-            except:  # noqa: E722
-                _LOGGER.debug("Unable to renew borrowings")
+            except TritiusApiClientError as ex:
+                _LOGGER.debug("Unable to renew borrowings %s", ex)
             else:
                 if result:
                     self.hass.async_create_task(

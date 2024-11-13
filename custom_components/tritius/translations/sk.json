@@ -1,0 +1,59 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "Ak potrebujete pomoc pozrite sem: https://github.com/tykovec/home-assistant-tritius",
+                "data": {
+                    "url": "Url",
+                    "username": "Užívateľ",
+                    "password": "Heslo"
+                }
+            }
+        },
+        "error": {
+            "auth": "Nedsprávny používateľ / heslo.",
+            "connection": "Problém s pripojením.",
+            "unknown": "Neznáma chyba."
+        }
+    },
+    "entity": {
+        "button": {
+            "renew_borrowings": {
+                "name": "Obnov pôžičky"
+            }
+        },
+        "sensor": {
+            "borrowings": {
+                "name": "Pôžičky"
+            },
+            "registration_expiration": {
+                "name": "Exspirácia registrácie"
+            },
+            "borrowing_expiration": {
+                "name": "Exspirácia pôžičky"
+            }
+        },
+        "binary_sensor": {
+            "borrowings_alert": {
+                "name": "Upozornenie na pôžičky"
+            }
+        },
+        "switch": {
+            "auto_renew_borrowings": {
+                "name": "Automatické obnovenie pôžičky"
+            }
+        }
+    },
+    "services": {
+        "renew_borrowings": {
+            "name": "Obnov pôžičky",
+            "description": "Obnov všetky pôžičky",
+            "fields": {
+                "device_id": {
+                    "name": "Zariadenie",
+                    "description": "Zariadenie"
+                }
+            }
+        }
+    }
+}

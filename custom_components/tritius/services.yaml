@@ -2,7 +2,6 @@ renew_borrowings:
   fields:
     device_id:
       required: true
-      multiple: true
       selector:
         device:
           integration: "tritius"

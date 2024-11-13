@@ -1,0 +1,12 @@
+{
+  "domain": "tritius",
+  "name": "Tritius",
+  "codeowners": [
+    "@tykovec"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/tykovec/home-assistant-tritius",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/tykovec/home-assistant-tritius/issues",
+  "version": "0.0.1"
+}

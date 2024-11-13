@@ -1,0 +1,59 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "If you need help with the configuration have a look here: https://github.com/tykovec/home-assistant-tritius",
+                "data": {
+                    "url": "Url",
+                    "username": "Username",
+                    "password": "Password"
+                }
+            }
+        },
+        "error": {
+            "auth": "Invalid username / password.",
+            "connection": "Unable to connect.",
+            "unknown": "Unknown error."
+        }
+    },
+    "entity": {
+        "button": {
+            "renew_borrowings": {
+                "name": "Renew borrowings"
+            }
+        },
+        "sensor": {
+            "borrowings": {
+                "name": "Borrowings"
+            },
+            "registration_expiration": {
+                "name": "Registration expiration"
+            },
+            "borrowing_expiration": {
+                "name": "Borrowing expiration"
+            }
+        },
+        "binary_sensor": {
+            "borrowings_alert": {
+                "name": "Borrowings alert"
+            }
+        },
+        "switch": {
+            "auto_renew_borrowings": {
+                "name": "Auto renew borrowings"
+            }
+        }
+    },
+    "services": {
+        "renew_borrowings": {
+            "name": "Renew borrowings",
+            "description": "Renew all borrowings",
+            "fields": {
+                "device_id": {
+                    "name": "Device",
+                    "description": "Device"
+                }
+            }
+        }
+    }
+}

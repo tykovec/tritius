@@ -203,7 +203,7 @@ class TritiusApiConnection:
         """Get information from the API."""
         try:
             async with async_timeout.timeout(10):
-                _LOGGER.debug("Calling %s %s data=%s", method, self.url + url, data)
+                _LOGGER.debug("Calling %s %s", method, self.url + url)
                 response = await self._session.request(
                     method=method, url=self.url + url, headers=headers, data=data
                 )

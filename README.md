@@ -6,16 +6,16 @@
 
 ![Project Maintenance][maintenance-shield]
 
-_Integration to integrate with [tritius](https://www.tritius.cz/), library system mainly used in Slovakia and Czechia.
-This is unofficial integration, do not contact system creator (Tritius Solutions) in case of issue.
-Links of instances / liraries can be found on here [libraries](https://knihovny.net/wwwlnew/odkazy1t.htm) _
+_Integration to integrate with [tritius](https://www.tritius.cz/), library system mainly used in Slovakia and Czechia._
+_This is unofficial integration, do not contact system creator (Tritius Solutions) in case of issue._
+_Links of instances / liraries can be found here [libraries](https://knihovny.net/wwwlnew/odkazy1t.htm)_
 
 **This integration will set up the following platforms.**
 
 Platform | Name | Description
 -- | -- | --
 `button` | `renew_borrowings` | Button for renewing all actual borrowings.
-`binary_sensor` | `borrowings_alert` | Alerting when borrowing is about to expire expiration (day before expiration).
+`binary_sensor` | `borrowings_alert` | Alerting when borrowing is about to expire (day before expiration).
 `sensor` | `borrowings` | Sensor displaying borrowing count.
 `sensor` | `registration_expiration` | Expiration of membership / registration in library.
 `sensor` | `borrowing_expiration` | Nearest borrowing expiration.

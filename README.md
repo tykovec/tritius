@@ -8,7 +8,7 @@
 
 _Integration to integrate with [tritius](https://www.tritius.cz/), library system mainly used in Slovakia and Czechia._
 _This is unofficial integration, do not contact system creator (Tritius Solutions) in case of issue._
-_Links of instances / liraries can be found on here [libraries](https://knihovny.net/wwwlnew/odkazy1t.htm)_
+_Links of instances / liraries can be found here [libraries](https://knihovny.net/wwwlnew/odkazy1t.htm)_
 
 **This integration will set up the following platforms.**
 
